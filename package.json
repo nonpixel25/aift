@@ -8,27 +8,9 @@ app.use(express.json());
 
 const sql = neon(process.env.DATABASE_URL);
 
-// 서버 확인
+// 테스트용
 app.get("/", (req, res) => {
   res.send("server ok");
-});
-
-// 회원가입
-app.post("/signup", async (req, res) => {
-  const { id, pw, name } = req.body;
-
-  try {
-    await sql`
-      INSERT INTO account (id, pw, name)
-      VALUES (${id}, ${pw}, ${name})
-    `;
-
-    res.send("회원가입 완료");
-
-  } catch (e) {
-    console.error(e);
-    res.status(500).send("회원가입 에러");
-  }
 });
 
 // 로그인
