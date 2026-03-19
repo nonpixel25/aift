@@ -1,32 +1,50 @@
-import express from "express";
-import { neon } from "@neondatabase/serverless";
+#1. 회원가입
 
-const app = express();
-const port = process.env.PORT || 3000;
+app.use(express.json());
 
-// Neon DB 연결
-const sql = neon(process.env.DATABASE_URL);
+app.post("/signup", async (req, res) => {
 
-app.get("/", async (req, res) => {
+  const { id, pw, name } = req.body;
+
   try {
 
-    // test 테이블 첫 행 가져오기
-    const result = await sql`
-      SELECT name FROM test
-      ORDER BY id
-      LIMIT 1
+    await sql`
+      INSERT INTO account (id, pw, name)
+      VALUES (${id}, ${pw}, ${name})
     `;
 
-    const name = result[0].name;
+    res.send("회원가입이 완료되었습니다");
 
-    res.send(`HELLO ${name}`);
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("DB error");
+  } catch (e) {
+    console.error(e);
+    res.status(500).send("에러");
   }
+
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+#2. 로그인
+
+app.post("/login", async (req, res) => {
+
+  const { id, pw } = req.body;
+
+  const result = await sql`
+    SELECT * FROM account
+    WHERE id = ${id}
+  `;
+
+  // 유저 없음
+  if (result.length === 0) {
+    return res.status(400).send("아이디 없음");
+  }
+
+  // 비밀번호 틀림
+  if (result[0].pw !== pw) {
+    return res.status(400).send("비밀번호 틀림");
+  }
+
+  // 성공
+  res.send("로그인 성공");
+
 });
+
